@@ -1,0 +1,92 @@
+4. Write a program to implement kruskal's minimum spanning tree algorithm.  
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Edge {
+    int u, v, weight;
+};
+
+struct DisjointSet {
+    vector<int> parent, rank;
+
+    DisjointSet(int n) {
+        parent.resize(n);
+        rank.resize(n, 0);
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+    }
+
+    int find(int x) {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);  
+        return parent[x];
+    }
+
+    void unite(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+
+        if (rootX != rootY) {
+            if (rank[rootX] < rank[rootY])
+                parent[rootX] = rootY;
+            else if (rank[rootX] > rank[rootY])
+                parent[rootY] = rootX;
+            else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+        }
+    }
+};
+
+bool compareEdges(Edge a, Edge b) {
+    return a.weight < b.weight;
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of vertices: ";
+    cin >> V;
+    cout << "Enter number of edges: ";
+    cin >> E;
+
+    vector<Edge> edges(E);
+
+    cout << "Enter edges (u v weight):\n";
+    for (int i = 0; i < E; i++) {
+        cin >> edges[i].u >> edges[i].v >> edges[i].weight;
+    }
+
+   
+    sort(edges.begin(), edges.end(), compareEdges);
+
+    DisjointSet ds(V);
+    vector<Edge> mst;
+    int totalWeight = 0;
+
+    cout << "\nEdges selected in Kruskal's MST:\n";
+
+    for (auto &edge : edges) {
+        int u_parent = ds.find(edge.u);
+        int v_parent = ds.find(edge.v);
+
+     
+        if (u_parent != v_parent) {
+            mst.push_back(edge);
+            totalWeight += edge.weight;
+            ds.unite(u_parent, v_parent);
+
+            cout << edge.u << " -- " << edge.v 
+                 << "  (Weight = " << edge.weight << ")\n";
+        }
+    }
+
+    cout << "\nTotal weight of MST = " << totalWeight << endl;
+
+    return 0;
+}
